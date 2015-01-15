@@ -200,4 +200,10 @@
      (hash-table-set! ht i (* i i)))
    (hash-table-ref/default ht 25 #f)))
 
+;; hasher bound argument test
+(test-assert (hash 'a 1))
+(test-assert (hash-by-identity 'a 1))
+(test-assert (string-hash 'a 1))
+(test-assert (string-ci-hash 'a 1))
+
 (test-end)

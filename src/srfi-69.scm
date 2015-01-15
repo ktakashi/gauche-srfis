@@ -62,10 +62,10 @@
 	  hash-table-copy   ;; re-export
 	  hash-table-merge!
 
-	  hash ;; re-export
+	  (rename srfi:hash hash)
 	  hash-by-identity 
-	  string-hash	 ;; re-export
-	  string-ci-hash ;; re-export
+	  (rename srfi:string-hash string-hash)
+	  string-ci-hash
 	  ))
 
 (select-module srfi-69)
@@ -82,8 +82,6 @@
 	  ((eq? eql? string-ci=?) (make-hash-table string-ci-comparator))
 	  (else (error "make-hash-table: unknown equivalent procedure" eql?))))
    (() (make-hash-table 'equal?))))
-
-(define hash-by-identity eq-hash)
 
 ;; bit different thing
 (define (hash-table-ref/default ht key default) (hash-table-get ht key default))
@@ -139,7 +137,22 @@
   (hash-table-for-each ht2 (lambda (k v) (hash-table-put! ht1 k v)))
   ht1)
 
-(define string-ci-hash string-hash-ci)
+(define-syntax define-hasher
+  (syntax-rules ()
+    ((_ name proc)
+     (define name
+       (case-lambda
+	((o) (name o 0))
+	((o bound)
+	 (let ((v (proc o)))
+	   (if (zero? bound)
+	       v
+	       (modulo v bound)))))))))
+
+(define-hasher srfi:hash hash)
+(define-hasher hash-by-identity eq-hash)
+(define-hasher srfi:string-hash string-hash)
+(define-hasher string-ci-hash string-hash-ci)
 
 ;; for some reason test-module complained
 (define hash-table-set! hash-table-put!)
